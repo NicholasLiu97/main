@@ -10,6 +10,7 @@ import optix.commands.shows.EditCommand;
 import optix.commands.shows.ListCommand;
 import optix.commands.shows.ListShowCommand;
 import optix.commands.shows.PostponeCommand;
+import optix.commands.shows.ViewProfitCommand;
 import optix.commands.seats.SellSeatCommand;
 import optix.commands.seats.ViewSeatsCommand;
 import optix.exceptions.OptixException;
@@ -64,6 +65,8 @@ public class Parser {
                 return parseDeleteAllOfShow(splitStr[1]);
             case "delete": // e.g. delete 2/10/2019|poto
                 return parseDeleteOneOfShow(splitStr[1]);
+            case "view-profit": //e.g. view-profit lion king|5/5/2020
+                return parseViewProfit(splitStr[1]);
             case "help":
                 return new HelpCommand(splitStr[1].trim());
             default:
@@ -199,5 +202,13 @@ public class Parser {
         String newShowName = splitStr[2].trim();
 
         return new EditCommand(oldShowName, showDate, newShowName);
+    }
+
+    private static Command parseViewProfit(String details) {
+        String[] splitStr = details.split("\\|");
+        String showName = splitStr[0];
+        String showDate = splitStr[1];
+
+        return new ViewProfitCommand(showName, showDate);
     }
 }

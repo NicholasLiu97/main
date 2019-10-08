@@ -241,4 +241,8 @@ public class Theatre {
                 return -1;
         }
     }
+
+    public double getProfit() {
+        return this.revenue-this.cost;
+    }
 }
