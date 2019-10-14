@@ -4,6 +4,7 @@ public class Seat {
     private double ticketPrice;
     private String buyerName;
     private String seatTier;
+    private int numberOfTiers;
     private boolean isBooked;
 
     /**
@@ -14,6 +15,7 @@ public class Seat {
     public Seat(String seatTier) {
         this.isBooked = false;
         this.buyerName = null;
+        this.numberOfTiers = 3;
         this.seatTier = seatTier;
     }
 
@@ -31,6 +33,11 @@ public class Seat {
         this.ticketPrice = ticketPrice;
     }
 
+    public void setTier(int newTier, int numTiers) {
+        this.seatTier = Integer.toString(newTier);
+        this.numberOfTiers = numTiers;
+    }
+
     public boolean isBooked() {
         return isBooked;
     }
@@ -42,11 +49,6 @@ public class Seat {
     public String getSeat() {
         return "[" + getStatusIcon() + "]";
     }
-
-    public void setSeatTier(String seatTier) {
-        this.seatTier = seatTier;
-    }
-
 
     public String getName() {
         return buyerName;
@@ -65,15 +67,66 @@ public class Seat {
      */
     public double getSeatPrice(double basePrice) {
         assert (Integer.parseInt(seatTier) <= 3 && Integer.parseInt(seatTier) > 0);
-        if (seatTier.equals("1")) {
-            ticketPrice = basePrice * 1.5;
+        if (numberOfTiers == 3) {
+            if (seatTier.equals("1")) {
+                ticketPrice = basePrice * 1.5;
+            }
+            if (seatTier.equals("2")) {
+                ticketPrice = basePrice * 1.2;
+            }
+            if (seatTier.equals("3")) {
+                ticketPrice = basePrice;
+            }
+        } else if (numberOfTiers == 4) {
+            if (seatTier.equals("1")) {
+                ticketPrice = basePrice * 1.5;
+            }
+            if (seatTier.equals("2")) {
+                ticketPrice = basePrice * 1.3;
+            }
+            if (seatTier.equals("3")) {
+                ticketPrice = basePrice * 1.1;
+            }
+            if (seatTier.equals("4")) {
+                ticketPrice = basePrice;
+            }
+        } else if (numberOfTiers == 5) {
+            if (seatTier.equals("1")) {
+                ticketPrice = basePrice * 1.8;
+            }
+            if (seatTier.equals("2")) {
+                ticketPrice = basePrice * 1.6;
+            }
+            if (seatTier.equals("3")) {
+                ticketPrice = basePrice * 1.4;
+            }
+            if (seatTier.equals("4")) {
+                ticketPrice = basePrice * 1.2;
+            }
+            if (seatTier.equals("5")) {
+                ticketPrice = basePrice;
+            }
+        } else {
+            if (seatTier.equals("1")) {
+                ticketPrice = basePrice * 2.0;
+            }
+            if (seatTier.equals("2")) {
+                ticketPrice = basePrice * 1.8;
+            }
+            if (seatTier.equals("3")) {
+                ticketPrice = basePrice * 1.6;
+            }
+            if (seatTier.equals("4")) {
+                ticketPrice = basePrice * 1.4;
+            }
+            if (seatTier.equals("5")) {
+                ticketPrice = basePrice * 1.2;
+            }
+            if (seatTier.equals("6")) {
+                ticketPrice = basePrice;
+            }
         }
-        if (seatTier.equals("2")) {
-            ticketPrice = basePrice * 1.2;
-        }
-        if (seatTier.equals("3")) {
-            ticketPrice = basePrice;
-        }
+
         return ticketPrice;
 
     }

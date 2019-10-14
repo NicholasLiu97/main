@@ -2,6 +2,8 @@ package optix.commons.model;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class Theatre {
     //@SuppressWarnings("checkstyle:membername")
@@ -12,6 +14,9 @@ public class Theatre {
     private int tierOneSeats;
     private int tierTwoSeats;
     private int tierThreeSeats;
+    private int tierFourSeats;
+    private int tierFiveSeats;
+    private int tierSixSeats;
     private double seatBasePrice;
 
     private double cost;
@@ -56,12 +61,15 @@ public class Theatre {
         tierOneSeats = 0;
         tierTwoSeats = 0;
         tierThreeSeats = 0;
+        tierFourSeats = 0;
+        tierFiveSeats = 0;
+        tierSixSeats = 0;
         for (int i = 0; i < seats.length; i++) {
             for (int j = 0; j < seats[i].length; j++) {
                 switch (i) {
                 case 0:
                 case 1:
-                    seats[i][j] = new Seat("1");
+                    seats[i][j] = new Seat("3");
                     tierOneSeats++;
                     break;
                 case 2:
@@ -71,7 +79,7 @@ public class Theatre {
                     break;
                 case 4:
                 case 5:
-                    seats[i][j] = new Seat("3");
+                    seats[i][j] = new Seat("1");
                     tierThreeSeats++;
                     break;
                 default:
@@ -102,6 +110,7 @@ public class Theatre {
      * @param col       desired seat column
      */
     public void setSeat(String buyerName, int row, int col) {
+        //ToDo find out a way to get number of seats in each tier
         seats[row][col].setBooked(true);
         seats[row][col].setName(buyerName);
         switch (seats[row][col].getSeatTier()) {
@@ -114,12 +123,48 @@ public class Theatre {
         case "3":
             tierThreeSeats--;
             break;
+        case "4":
+            tierFourSeats--;
+            break;
+        case "5":
+            tierFiveSeats--;
+            break;
+        case "6":
+            tierSixSeats--;
+            break;
         default:
             System.out.println("Should have a Seat Tier!");
         }
     }
 
-    /**
+    public void setTiers(TreeMap<String, Integer> seatTiers, int numberOfTiers) {
+        for (Map.Entry<String, Integer> entry : seatTiers.entrySet()) {
+            String key = entry.getKey();
+            int value = entry.getValue();
+            int row = 0;
+
+            switch (key) {
+            case "A":
+                row = 0;
+            case "B":
+                row = 1;
+            case "C":
+                row = 2;
+            case "D":
+                row = 3;
+            case "E":
+                row = 4;
+            case "F":
+                row = 5;
+            }
+
+            for (int j = 0; j < seats[row].length; j++) {
+                seats[row][j].setTier(value, numberOfTiers);
+            }
+        }
+    }
+
+                        /**
      * Get the seating arrangement of the Theatre.
      *
      * @return seating arrangement as a String.

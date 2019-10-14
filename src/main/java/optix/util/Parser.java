@@ -1,5 +1,6 @@
 package optix.util;
 
+import optix.commands.seats.SetTierCommand;
 import optix.commands.shows.AddCommand;
 import optix.commands.ByeCommand;
 import optix.commands.Command;
@@ -68,6 +69,8 @@ public class Parser {
                 return parseDeleteOneOfShow(splitStr[1]);
             case "view-profit": //e.g. view-profit lion king|5/5/2020
                 return parseViewProfit(splitStr[1]);
+            case "set-tier": //e.g. set-tier lion king|5/5/2020|A B|C D|E|F
+                return parseSetTier(splitStr[1]);
             case "help":
                 return new HelpCommand(splitStr[1].trim());
             default:
@@ -217,5 +220,14 @@ public class Parser {
         String showDate = splitStr[1];
 
         return new ViewProfitCommand(showName, showDate);
+    }
+
+    private static Command parseSetTier(String details) {
+        String[] splitStr = details.split("\\|", 3);
+        String showName = splitStr[0];
+        String showDate = splitStr[1];
+        String tierSettings = splitStr[2];
+
+        return new SetTierCommand(showName, showDate, tierSettings);
     }
 }
