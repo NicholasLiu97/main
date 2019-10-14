@@ -352,9 +352,20 @@ public class Parser {
         return new EditCommand(oldShowName, showDate, newShowName);
     }
 
-
-    private static Command parseViewProfit(String details) {
+    /**
+     * Parse the remaining user input to its respective parameters for ViewProfitCommand.
+     *
+     * @param details The details to create a new EditCommand Object.
+     * @return new ViewProfitCommand Object.
+     * @throws OptixInvalidCommandException if the user input does not have the correct number of parameters.
+     */
+    private static Command parseViewProfit(String details) throws OptixInvalidCommandException {
         String[] splitStr = details.trim().split("\\|");
+
+        if (splitStr.length != 2) {
+            throw new OptixInvalidCommandException();
+        }
+
         String showName = splitStr[0];
         String showDate = splitStr[1];
 
