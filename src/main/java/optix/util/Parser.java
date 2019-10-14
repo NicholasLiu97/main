@@ -212,7 +212,7 @@ public class Parser {
     }
 
     private static Command parseViewProfit(String details) {
-        String[] splitStr = details.split("\\|");
+        String[] splitStr = details.trim().split("\\|");
         String showName = splitStr[0];
         String showDate = splitStr[1];
 

@@ -285,7 +285,7 @@ public class Theatre {
     }
 
     public double getProfit() {
-        return this.revenue - this.cost;
+        return revenue + cost;
     }
 
     public int getTierOneSeats() {

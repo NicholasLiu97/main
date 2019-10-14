@@ -10,11 +10,9 @@ import optix.commons.model.Theatre;
 import optix.exceptions.OptixInvalidDateException;
 import optix.util.OptixDateFormatter;
 import optix.commons.model.ShowMap;
-
 import java.time.LocalDate;
 
-public class ViewProfitCommand extends Command{
-
+public class ViewProfitCommand extends Command {
     private String showName;
     private String showDate;
 
@@ -27,9 +25,14 @@ public class ViewProfitCommand extends Command{
 
     private static final String MESSAGE_SUCCESSFUL = "The profit for %1$s on %2$s is %3$s\n";
 
+    /**
+     * Views the profit made from a show on a certain date.
+     * @param showName name of the show.
+     * @param showDate date of the show.
+     */
     public ViewProfitCommand(String showName, String showDate) {
-        this.showName = showName;
-        this.showDate = showDate;
+        this.showName = showName.trim();
+        this.showDate = showDate.trim();
     }
 
     @Override
@@ -71,4 +74,10 @@ public class ViewProfitCommand extends Command{
             ui.setMessage(message);
         }
     }
+
+    @Override
+    public boolean isExit() {
+        return super.isExit();
+    }
+
 }
