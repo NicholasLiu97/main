@@ -33,8 +33,8 @@ public class ViewMonthlyCommand extends Command {
      * @param year  Year to query for.
      */
     public ViewMonthlyCommand(String month, String year) {
-        this.month = month.trim().toLowerCase();
-        this.year = year.trim().toLowerCase();
+        this.month = month.trim();
+        this.year = year.trim();
         System.out.println("the month is " + month);
         System.out.println("the year is " + year);
     }
@@ -48,7 +48,7 @@ public class ViewMonthlyCommand extends Command {
         int mth = 1;
 
         for (int i = 0; i < monthList.length; i++) {
-            if (month.equals(monthList[i])) {
+            if (month.toLowerCase().equals(monthList[i])) {
                 return mth;
             } else {
                 mth++;
@@ -65,7 +65,7 @@ public class ViewMonthlyCommand extends Command {
      */
     private boolean isValidMonth(String description) {
         for (int i = 0; i < monthList.length; i++) {
-            if (description.equals(monthList[i])) {
+            if (description.toLowerCase().equals(monthList[i])) {
                 return true;
             }
         }

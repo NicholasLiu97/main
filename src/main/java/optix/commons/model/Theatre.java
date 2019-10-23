@@ -56,8 +56,8 @@ public class Theatre {
                 switch (i) {
                 case 0:
                 case 1:
-                    seats[i][j] = new Seat("1");
-                    tierOneSeats++;
+                    seats[i][j] = new Seat("3");
+                    tierThreeSeats++;
                     break;
                 case 2:
                 case 3:
@@ -66,8 +66,8 @@ public class Theatre {
                     break;
                 case 4:
                 case 5:
-                    seats[i][j] = new Seat("3");
-                    tierThreeSeats++;
+                    seats[i][j] = new Seat("1");
+                    tierOneSeats++;
                     break;
                 default:
                     assert i > seats.length;
