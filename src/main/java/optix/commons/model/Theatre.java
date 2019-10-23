@@ -1,5 +1,7 @@
 package optix.commons.model;
 
+import optix.exceptions.OptixException;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
@@ -226,6 +228,91 @@ public class Theatre {
         }
 
         return message;
+    }
+
+    /**
+     * Reassigns the seat of a customer.
+     * @param oldSeat The seat to be changed.
+     * @param newSeat The seat to change to.
+     * @return Message detailing the success of reassignment and the cost difference between the seats.
+     */
+    public String reassignSeat(String oldSeat, String newSeat) {
+        StringBuilder message = new StringBuilder();
+
+        double costOfNewSeat = sellSeats(newSeat);
+        double costOfOldSeat = removeSeat(oldSeat);
+        if (oldSeat.equals(newSeat)) {
+            message.append(String.format("Your current seat is already %1$s.\n", oldSeat));
+            return message.toString();
+        }
+
+        if ((int)costOfNewSeat == 0) { //not in seat format (i.e. A1)
+            message.append(String.format("☹ OOPS!!! Seat %1$s is unavailable. Use the View Command to"
+                    + " view the available seats.\n", newSeat));
+            return message.toString();
+        }
+
+        if ((int)costOfOldSeat == 0) { //if seat number is invalid.
+            message.append("☹ OOPS!!! Please enter a valid seat number.\n");
+            return message.toString();
+        } else if ((int)costOfOldSeat == -1) { //if the seat has not been booked yet.
+            message.append(String.format("The seat %1$s is still available for booking.\n", oldSeat));
+            return message.toString();
+        }
+
+        double currRevenue = show.getProfit();
+        currRevenue -= costOfOldSeat;
+        currRevenue += costOfNewSeat;
+        show.setProfit(currRevenue);
+
+        message.append(String.format("Your seat has been successfully changed from %1$s to %2$s.\n", oldSeat,
+                newSeat));
+
+        if (costOfNewSeat > costOfOldSeat) {
+            double extraCost = costOfNewSeat - costOfOldSeat;
+            message.append(String.format("An extra cost of %1$s is required.\n", extraCost));
+        } else if (costOfOldSeat > costOfNewSeat) {
+            double returnCost = costOfOldSeat - costOfNewSeat;
+            message.append(String.format("%1$s will be returned.\n", returnCost));
+        }
+        return message.toString();
+    }
+
+    /**
+     * Removes a seat booking from the theatre.
+     * @param seatToRemove The seat to be removed.
+     * @return The cost of the seat that has been removed.
+     */
+    public double removeSeat(String seatToRemove) {
+        int row = getRow(seatToRemove.substring(0, 1));
+        int col = getCol(seatToRemove.substring(1));
+        double seatPrice = 0;
+
+        if (row == -1 || col == -1) {
+            return seatPrice;
+        } else if (!seats[row][col].isBooked()) {
+            seatPrice = -1;
+            return seatPrice;
+        }
+        double currRevenue = show.getProfit();
+        seatPrice = seats[row][col].getSeatPrice(seatBasePrice);
+        seats[row][col].setBooked(false);
+        show.setProfit(currRevenue);
+
+        switch (seats[row][col].getSeatTier()) {
+        case "1":
+            tierOneSeats++;
+            break;
+        case "2":
+            tierTwoSeats++;
+            break;
+        case "3":
+            tierThreeSeats++;
+            break;
+        default:
+        }
+
+        return seatPrice;
     }
 
     private int getRow(String row) {

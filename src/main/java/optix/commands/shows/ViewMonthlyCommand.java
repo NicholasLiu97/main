@@ -35,8 +35,6 @@ public class ViewMonthlyCommand extends Command {
     public ViewMonthlyCommand(String month, String year) {
         this.month = month.trim();
         this.year = year.trim();
-        System.out.println("the month is " + month);
-        System.out.println("the year is " + year);
     }
 
     /**

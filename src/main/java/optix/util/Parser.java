@@ -6,6 +6,7 @@ import optix.commands.HelpCommand;
 import optix.commands.parser.AddAliasCommand;
 import optix.commands.parser.RemoveAliasCommand;
 import optix.commands.parser.ResetAliasCommand;
+import optix.commands.seats.ReassignSeatCommand;
 import optix.commands.seats.SellSeatCommand;
 import optix.commands.seats.ViewSeatsCommand;
 import optix.commands.shows.AddCommand;
@@ -118,6 +119,8 @@ public class Parser {
                 return parseAddAlias(splitStr[1]);
             case "remove-alias":
                 return parseRemoveAlias(splitStr[1]);
+            case "reassign": //e.g. reassign lion king|5/5/2020|A1|B1
+                return parseReassign(splitStr[1]);
             default:
                 throw new OptixInvalidCommandException();
             }
@@ -352,6 +355,20 @@ public class Parser {
         String year = splitStr[1];
 
         return new ViewMonthlyCommand(month, year);
+    }
+
+    private static Command parseReassign(String details) throws OptixInvalidCommandException {
+        String[] splitStr = details.trim().split("\\|");
+        if (splitStr.length != 4) {
+            throw new OptixInvalidCommandException();
+        }
+
+        String showName = splitStr[0].trim();
+        String showDate = splitStr[1].trim();
+        String oldSeat = splitStr[2].trim();
+        String newSeat = splitStr[3].trim();
+
+        return new ReassignSeatCommand(showName, showDate, oldSeat, newSeat);
     }
 
     //// Parser Commands that deals with Seats within the theatre.
