@@ -239,28 +239,37 @@ public class Theatre {
     public String reassignSeat(String oldSeat, String newSeat) {
         StringBuilder message = new StringBuilder();
 
-        double costOfNewSeat = sellSeats(newSeat);
-        double costOfOldSeat = removeSeat(oldSeat);
+        int oldSeatRow = getRow(oldSeat.substring(0, 1));
+        int oldSeatCol = getCol(oldSeat.substring(1));
+        int newSeatRow = getRow(newSeat.substring(0, 1));
+        int newSeatCol = getCol(newSeat.substring(1));
+
+
         if (oldSeat.equals(newSeat)) {
             message.append(String.format("Your current seat is already %1$s.\n", oldSeat));
             return message.toString();
         }
 
-        if ((int)costOfNewSeat == 0) { //not in seat format (i.e. A1)
+        //if seat number is invalid.
+        if (oldSeatRow == -1 || oldSeatCol == -1 || newSeatRow == -1 || newSeatCol == -1) {
+            message.append("☹ OOPS!!! Please enter valid seat numbers.\n");
+            return message.toString();
+        }
+
+        if (!seats[oldSeatRow][oldSeatCol].isBooked()) { //if the seat has not been booked yet.
+            message.append(String.format("The seat %1$s is still available for booking.\n", oldSeat));
+            return message.toString();
+        }
+
+        if (seats[newSeatRow][newSeatCol].isBooked()) { // if the new seat has already been booked.
             message.append(String.format("☹ OOPS!!! Seat %1$s is unavailable. Use the View Command to"
                     + " view the available seats.\n", newSeat));
             return message.toString();
         }
 
-        if ((int)costOfOldSeat == 0) { //if seat number is invalid.
-            message.append("☹ OOPS!!! Please enter a valid seat number.\n");
-            return message.toString();
-        } else if ((int)costOfOldSeat == -1) { //if the seat has not been booked yet.
-            message.append(String.format("The seat %1$s is still available for booking.\n", oldSeat));
-            return message.toString();
-        }
-
         double currRevenue = show.getProfit();
+        double costOfNewSeat = sellSeats(newSeat);
+        double costOfOldSeat = removeSeat(oldSeat);
         currRevenue -= costOfOldSeat;
         currRevenue += costOfNewSeat;
         show.setProfit(currRevenue);
