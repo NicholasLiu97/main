@@ -29,12 +29,16 @@ public class ViewMonthlyCommand extends Command {
 
     /**
      * Views the profit for a certain month.
-     * @param month Month to query for.
-     * @param year  Year to query for.
+     * @param splitStr String of format "MONTH YEAR"
      */
-    public ViewMonthlyCommand(String month, String year) {
-        this.month = month.trim();
-        this.year = year.trim();
+
+    public ViewMonthlyCommand(String splitStr) {
+        String[] details = parseDetails(splitStr);
+        this.month = details[0].trim().toLowerCase();
+        this.year = details[1].trim().toLowerCase();
+        System.out.println("the month is " + month);
+        System.out.println("the year is " + year);
+
     }
 
     /**
@@ -149,6 +153,11 @@ public class ViewMonthlyCommand extends Command {
         } finally {
             ui.setMessage(message);
         }
+    }
+
+    @Override
+    public String[] parseDetails(String details) {
+        return details.trim().split(" ");
     }
 
     @Override
