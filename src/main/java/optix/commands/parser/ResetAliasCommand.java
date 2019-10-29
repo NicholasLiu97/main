@@ -4,12 +4,18 @@ import optix.commands.Command;
 import optix.commons.Model;
 import optix.commons.Storage;
 import optix.ui.Ui;
+import optix.util.Parser;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.IOException;
 
+//@@author OungKennedy
 public class ResetAliasCommand extends Command {
+    private File preferenceFilePath;
+
+    public ResetAliasCommand(File filePath) {
+        this.preferenceFilePath = filePath;
+    }
 
     /**
      * Processes user input to be stored, queried, modified in ShowMap,
@@ -20,18 +26,33 @@ public class ResetAliasCommand extends Command {
      * @param storage The filepath of txt file which data are being stored.
      */
     @Override
-    public void execute(Model model, Ui ui, Storage storage) {
+    public String execute(Model model, Ui ui, Storage storage) {
         // open target file
-        File currentDir = new File(System.getProperty("user.dir"));
-        File filePath = new File(currentDir.toString() + "\\src\\main\\data\\ParserPreferences.txt");
+        Parser dummyParser = new Parser(this.preferenceFilePath);
+        // reset commandAliasMap in Parser class
+        Parser.resetPreferences();
+        // write the current contents of the commandAliasMap to the saveFile.
+        String systemMessage;
         try {
-            PrintWriter pw = new PrintWriter(filePath);
-            pw.close();
-            String systemMessage = "Alias settings have been reset to default.\n";
-            ui.setMessage(systemMessage);
-        } catch (FileNotFoundException e) {
-            ui.setMessage(e.getMessage());
+            dummyParser.savePreferences();
+            systemMessage = "Alias settings have been reset to default.\n";
+
+        } catch (IOException e) {
+            systemMessage = e.getMessage();
         }
+        ui.setMessage(systemMessage);
+        return "";
+    }
+
+    /**
+     * Dummy command.
+     *
+     * @param details n.a
+     * @return n.a
+     */
+    @Override
+    public String[] parseDetails(String details) {
+        return new String[0];
     }
 }
 

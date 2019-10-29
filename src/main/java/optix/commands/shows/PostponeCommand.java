@@ -3,18 +3,17 @@ package optix.commands.shows;
 import optix.commands.Command;
 import optix.commons.Model;
 import optix.commons.Storage;
-import optix.commons.model.ShowMap;
-import optix.commons.model.Theatre;
+import optix.exceptions.OptixException;
+import optix.exceptions.OptixInvalidCommandException;
 import optix.exceptions.OptixInvalidDateException;
 import optix.ui.Ui;
 import optix.util.OptixDateFormatter;
 
 import java.time.LocalDate;
 
+//@@author CheeSengg
 public class PostponeCommand extends Command {
-    private String showName;
-    private String oldDate;
-    private String newDate;
+    private String details;
 
     private OptixDateFormatter formatter = new OptixDateFormatter();
 
@@ -31,26 +30,22 @@ public class PostponeCommand extends Command {
 
     /**
      * Command to postpone show.
-     *
-     * @param showName show name
-     * @param oldDate  current show date
-     * @param newDate  new show date
+     * @param splitStr String containing "SHOW_NAME|OLD_DATE|NEW_DATE"
      */
-    public PostponeCommand(String showName, String oldDate, String newDate) {
-        // need to check if both dates are valid if not throw exception
-        // need to check if the event was completed in the past. Past event shouldn't be postponed.
-        this.showName = showName;
-        this.oldDate = oldDate;
-        this.newDate = newDate;
+    public PostponeCommand(String splitStr) {
+        this.details = splitStr;
     }
 
     @Override
-    public void execute(Model model, Ui ui, Storage storage) {
-        ShowMap shows = model.getShows();
+    public String execute(Model model, Ui ui, Storage storage) {
         String message = "";
         LocalDate today = storage.getToday();
-
         try {
+            String[] details = parseDetails(this.details);
+            String showName = details[0].trim();
+            String oldDate = details[1].trim();
+            String newDate = details[2].trim();
+
             if (!formatter.isValidDate(oldDate) || !formatter.isValidDate(newDate)) {
                 throw new OptixInvalidDateException();
             }
@@ -61,28 +56,32 @@ public class PostponeCommand extends Command {
             if (localNewDate.compareTo(today) <= 0) {
                 message = MESSAGE_INVALID_NEW_DATE;
             } else {
-                if (!shows.containsKey(localOldDate)) {
+                if (!model.containsKey(localOldDate)) {
                     message = MESSAGE_SHOW_NOT_FOUND;
-                } else if (shows.containsKey(localNewDate)) {
+                } else if (model.containsKey(localNewDate)) {
                     message = String.format(MESSAGE_SHOW_CLASH, newDate);
-                } else if (!shows.get(localOldDate).hasSameName(showName)) {
+                } else if (!model.hasSameName(localOldDate, showName)) {
                     message = MESSAGE_DOES_NOT_MATCH;
                 } else {
-                    Theatre postponedShow = shows.removeShow(localOldDate);
-                    shows.put(localNewDate, postponedShow);
-                    model.setShows(shows);
+                    model.postponeShow(localOldDate, localNewDate);
+                    storage.write(model.getShows());
                     message = String.format(MESSAGE_SUCCESSFUL, showName, oldDate, newDate);
                 }
             }
-        } catch (OptixInvalidDateException e) {
+        } catch (OptixException e) {
             message = e.getMessage();
         } finally {
             ui.setMessage(message);
         }
+        return "show";
     }
 
     @Override
-    public boolean isExit() {
-        return super.isExit();
+    public String[] parseDetails(String details) throws OptixInvalidCommandException {
+        String[] detailsArray = details.trim().split("\\|",3);
+        if ((detailsArray.length) != 3) {
+            throw new OptixInvalidCommandException();
+        }
+        return detailsArray;
     }
 }

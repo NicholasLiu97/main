@@ -3,53 +3,67 @@ package optix.commands.seats;
 import optix.commands.Command;
 import optix.commons.Model;
 import optix.commons.Storage;
-import optix.commons.model.ShowMap;
-import optix.commons.model.Theatre;
+import optix.exceptions.OptixException;
+import optix.exceptions.OptixInvalidCommandException;
 import optix.exceptions.OptixInvalidDateException;
 import optix.ui.Ui;
 import optix.util.OptixDateFormatter;
 
 import java.time.LocalDate;
 
+//@@author CheeSengg
 public class ViewSeatsCommand extends Command {
-    private String showName;
-    private String showDate;
+    private String details;
 
     private OptixDateFormatter formatter = new OptixDateFormatter();
 
-    public ViewSeatsCommand(String showName, String showDate) {
-        this.showName = showName;
-        this.showDate = showDate;
+    private static final String MESSAGE_SHOW_FOUND = "Here is the layout of the theatre for %1$s on %2$s:\n";
+
+    private static final String MESSAGE_SHOW_NOT_FOUND = "☹ OOPS!!! Sorry the show %1$s cannot be found.\n";
+
+    /**
+     * Command to view seats of a show.
+     * @param splitStr String of format "SHOW_NAME|SHOW_DATE"
+     */
+    public ViewSeatsCommand(String splitStr) {
+        this.details = splitStr;
     }
 
     @Override
-    public void execute(Model model, Ui ui, Storage storage) {
-        ShowMap shows = model.getShows();
+    public String execute(Model model, Ui ui, Storage storage) {
         StringBuilder message = new StringBuilder();
         try {
+            String[] arrayDetails = parseDetails(this.details);
+            String showName = arrayDetails[0].trim();
+            String showDate = arrayDetails[1].trim();
+
             if (!formatter.isValidDate(showDate)) {
                 throw new OptixInvalidDateException();
             }
 
             LocalDate showLocalDate = formatter.toLocalDate(showDate);
-            message.append(String.format("Here is the layout of the theatre for %s on %s:\n", showName, showDate));
 
-            if (shows.containsKey(showLocalDate) && shows.get(showLocalDate).hasSameName(showName)) {
-                Theatre theatre = shows.get(showLocalDate);
-                message.append(theatre.getSeatingArrangement());
+            if (model.containsKey(showLocalDate) && model.hasSameName(showLocalDate, showName)) {
+                message = new StringBuilder(String.format(MESSAGE_SHOW_FOUND, showName, showDate));
+                message.append(model.viewSeats(showLocalDate));
             } else {
-                message = new StringBuilder("☹ OOPS!!! Sorry the show " + showName + " cannot be found.\n");
+                message = new StringBuilder(String.format(MESSAGE_SHOW_NOT_FOUND, showName));
             }
-
-        } catch (OptixInvalidDateException e) {
+        } catch (OptixException e) {
             message.append(e.getMessage());
         } finally {
             ui.setMessage(message.toString());
         }
+        return "seat";
     }
 
     @Override
-    public boolean isExit() {
-        return super.isExit();
+    public String[] parseDetails(String details) throws OptixInvalidCommandException {
+        String[] detailsArray = details.trim().split("\\|");
+        if (detailsArray.length != 2) {
+            throw new OptixInvalidCommandException();
+        }
+        return detailsArray;
     }
+
 }

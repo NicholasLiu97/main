@@ -1,7 +1,10 @@
 package optix.util;
 
+import optix.exceptions.OptixInvalidDateException;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.text.DateFormatSymbols;
 
 /**
  * Formats input date to YYYY-MM-DD to be sorted in ShowMap.
@@ -47,6 +50,17 @@ public class OptixDateFormatter {
     }
 
     /**
+     * Formate date from LocalDate to String.
+     * @param localDate YYYY-MM-DD.
+     * @return String for the date. Format: DD/MM/YYYY.
+     */
+    public String toStringDate(LocalDate localDate) {
+        String[] splitStr = localDate.toString().split("-", 3);
+
+        return String.format("%s/%s/%s", splitStr[2], splitStr[1], splitStr[0]);
+    }
+
+    /**
      * Checks if date given exists in calendar.
      *
      * @param date String input of the date.
@@ -55,6 +69,10 @@ public class OptixDateFormatter {
      */
     public boolean isValidDate(String date) {
         String[] splitStr = date.split("/");
+        if (splitStr.length != 3) {
+            return false;
+        }
+
         int yr = Integer.parseInt(splitStr[2]);
         int mth = Integer.parseInt(splitStr[1]);
         int dy = Integer.parseInt(splitStr[0]);
@@ -78,6 +96,80 @@ public class OptixDateFormatter {
      */
     private boolean isLeap(int year) {
         return year % 400 == 0 || (year % 4 == 0 && year % 100 != 0);
+    }
+
+    /**
+     * Get year in numeric form.
+     * @param year String format: YYYY.
+     * @return Integer number for year.
+     */
+    public int getYear(String year) throws OptixInvalidDateException {
+        try {
+            return Integer.parseInt(year);
+        } catch (NumberFormatException e) {
+            throw new OptixInvalidDateException();
+        }
+    }
+
+    /**
+     * Get month in numeric form.
+     * @param month String format: MMMM.
+     * @return Integer number for month.
+     */
+    public int getMonth(String month) {
+        int num;
+        try {
+            num = Integer.parseInt(month);
+            if (num < 0 || num > 12) {
+                return 0;
+            }
+        } catch (NumberFormatException e) {
+            switch (month) {
+            case "january":
+            case "jan":
+                return 1;
+            case "february":
+            case "feb":
+                return 2;
+            case "march":
+            case "mar":
+                return 3;
+            case "april":
+            case "apr":
+                return 4;
+            case "may":
+                return 5;
+            case "june":
+            case "jun":
+                return 6;
+            case "july":
+            case "jul":
+                return 7;
+            case "august":
+            case "aug":
+                return 8;
+            case "september":
+            case "sep":
+            case "sept":
+                return 9;
+            case "october":
+            case "oct":
+                return 10;
+            case "november":
+            case "nov":
+                return 11;
+            case "december":
+            case "dec":
+                return 12;
+            default:
+                return 0;
+            }
+        }
+        return num;
+    }
+
+    public String intToMonth(int month) {
+        return new DateFormatSymbols().getMonths()[month - 1];
     }
 
     /**

@@ -1,12 +1,12 @@
 package optix.commons.model;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class Theatre {
     //@SuppressWarnings("checkstyle:membername")
     private static final String SPACES = "  "; // CHECKSTYLE IGNORE THIS LINE
     private static final String STAGE = "                |STAGE|           \n"; // CHECKSTYLE IGNORE THIS LINE
+    private static final String MESSAGE_TICKET_COST = "The total cost of the ticket is $%1$.2f\n";
 
     private Seat[][] seats = new Seat[6][10];
     private int tierOneSeats;
@@ -41,6 +41,10 @@ public class Theatre {
         initializeLayout();
     }
 
+    public Theatre(Show show) {
+        this.show = show;
+    }
+
     // can have multiple layouts to be added for future extensions.
 
     private void initializeLayout() {
@@ -52,8 +56,8 @@ public class Theatre {
                 switch (i) {
                 case 0:
                 case 1:
-                    seats[i][j] = new Seat("1");
-                    tierOneSeats++;
+                    seats[i][j] = new Seat("3");
+                    tierThreeSeats++;
                     break;
                 case 2:
                 case 3:
@@ -62,8 +66,8 @@ public class Theatre {
                     break;
                 case 4:
                 case 5:
-                    seats[i][j] = new Seat("3");
-                    tierThreeSeats++;
+                    seats[i][j] = new Seat("1");
+                    tierOneSeats++;
                     break;
                 default:
                     assert i > seats.length;
@@ -87,6 +91,22 @@ public class Theatre {
 
     public Seat[][] getSeats() {
         return seats;
+    }
+
+    public String getTierOneSeats() {
+        return Integer.toString(tierOneSeats);
+    }
+
+    public String getTierTwoSeats() {
+        return Integer.toString(tierTwoSeats);
+    }
+
+    public String getTierThreeSeats() {
+        return Integer.toString(tierThreeSeats);
+    }
+
+    public double getSeatBasePrice() {
+        return seatBasePrice;
     }
 
     /**
@@ -163,25 +183,9 @@ public class Theatre {
             soldSeat.setBooked(true);
             costOfSeat = soldSeat.getSeatPrice(seatBasePrice);
             revenue += costOfSeat;
-
-            switch (soldSeat.getSeatTier()) {
-            case "1":
-                tierOneSeats--;
-                break;
-            case "2":
-                tierTwoSeats--;
-                break;
-            case "3":
-                tierThreeSeats--;
-                break;
-            default:
-            }
-            seats[row][col] = soldSeat;
-
+            this.setSeat(row, col);
         }
-
         show.setProfit(revenue);
-
         return costOfSeat;
     }
 
@@ -212,20 +216,108 @@ public class Theatre {
         } else if (seatsNotSold.isEmpty()) {
             message = "You have successfully purchased the following seats: \n"
                     + seatsSold + "\n"
-                    + "The total cost of the ticket is " + new DecimalFormat("$#.00").format(totalCost) + "\n";
+                    + String.format(MESSAGE_TICKET_COST, totalCost);
         } else {
             message = "You have successfully purchased the following seats: \n"
                     + seatsSold + "\n"
-                    + "The total cost of the ticket is " + new DecimalFormat("$#.00").format(totalCost) + "\n"
+                    + String.format(MESSAGE_TICKET_COST, totalCost)
                     + "The following seats are unavailable: \n"
                     + seatsNotSold + "\n";
         }
-
         return message;
     }
 
+    /**
+     * Reassigns the seat of a customer.
+     * @param oldSeat The seat to be changed.
+     * @param newSeat The seat to change to.
+     * @return Message detailing the success of reassignment and the cost difference between the seats.
+     */
+    public String reassignSeat(String oldSeat, String newSeat) {
+        StringBuilder message = new StringBuilder();
+
+        int oldSeatRow = getRow(oldSeat.substring(0, 1));
+        int oldSeatCol = getCol(oldSeat.substring(1));
+        int newSeatRow = getRow(newSeat.substring(0, 1));
+        int newSeatCol = getCol(newSeat.substring(1));
+
+        //if seat number is invalid.
+        if (oldSeatRow == -1 || oldSeatCol == -1 || newSeatRow == -1 || newSeatCol == -1) {
+            message.append("☹ OOPS!!! Please enter valid seat numbers.\n");
+            return message.toString();
+        }
+
+        if (oldSeat.equals(newSeat)) {
+            message.append(String.format("Your current seat is already %1$s.\n", oldSeat));
+            return message.toString();
+        }
+
+        if (!seats[oldSeatRow][oldSeatCol].isBooked()) { //if the seat has not been booked yet.
+            message.append(String.format("The seat %1$s is still available for booking.\n", oldSeat));
+            return message.toString();
+        }
+
+        if (seats[newSeatRow][newSeatCol].isBooked()) { // if the new seat has already been booked.
+            message.append(String.format("☹ OOPS!!! Seat %1$s is unavailable. Use the View Command to"
+                    + " view the available seats.\n", newSeat));
+            return message.toString();
+        }
+
+        double costOfNewSeat = sellSeats(newSeat);
+        double costOfOldSeat = removeSeat(oldSeat);
+
+        message.append(String.format("Your seat has been successfully changed from %1$s to %2$s.\n", oldSeat,
+                newSeat));
+
+        if (costOfNewSeat > costOfOldSeat) {
+            double extraCost = costOfNewSeat - costOfOldSeat;
+            message.append(String.format("An extra cost of $%1$.2f is required.\n", extraCost));
+        } else if (costOfOldSeat > costOfNewSeat) {
+            double returnCost = costOfOldSeat - costOfNewSeat;
+            message.append(String.format("$%1$.2f will be returned.\n", returnCost));
+        }
+        return message.toString();
+    }
+
+    /**
+     * Removes a seat booking from the theatre.
+     * @param seatToRemove The seat to be removed.
+     * @return The cost of the seat that has been removed.
+     */
+    public double removeSeat(String seatToRemove) {
+        int row = getRow(seatToRemove.substring(0, 1));
+        int col = getCol(seatToRemove.substring(1));
+        double seatPrice = 0;
+
+        if (row == -1 || col == -1) {
+            return seatPrice;
+        } else if (!seats[row][col].isBooked()) {
+            seatPrice = 0;
+            return seatPrice;
+        }
+        double currRevenue = show.getProfit();
+        seatPrice = seats[row][col].getSeatPrice(seatBasePrice);
+        seats[row][col].setBooked(false);
+        show.setProfit(currRevenue - seatPrice);
+
+        switch (seats[row][col].getSeatTier()) {
+        case "1":
+            tierOneSeats++;
+            break;
+        case "2":
+            tierTwoSeats++;
+            break;
+        case "3":
+            tierThreeSeats++;
+            break;
+        default:
+        }
+
+        return seatPrice;
+    }
+
     private int getRow(String row) {
-        switch (row) {
+        switch (row.toUpperCase()) {
         case "A":
             return 0;
         case "B":

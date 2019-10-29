@@ -1,75 +1,103 @@
 package optix.commands.shows;
 
-import optix.commons.Model;
-import optix.ui.Ui;
 import optix.commands.Command;
+import optix.commons.Model;
 import optix.commons.Storage;
-import optix.commons.model.Theatre;
-import optix.exceptions.OptixInvalidDateException;
+import optix.exceptions.OptixException;
+import optix.exceptions.OptixInvalidCommandException;
+import optix.ui.Ui;
 import optix.util.OptixDateFormatter;
-import optix.commons.model.ShowMap;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 
+//@@author CheeSengg
 public class AddCommand extends Command {
-    private String showName;
-    private String date;
-    private double seatBasePrice;
+    private String details;
 
     private OptixDateFormatter formatter = new OptixDateFormatter();
 
-    private static final String MESSAGE_IN_THE_PAST = "☹ OOPS!!! It is not possible to perform in the past.\n";
+    private static final String MESSAGE_SUCCESSFUL = "Noted. The following shows has been added:\n";
 
-    private static final String MESSAGE_THEATRE_BOOKED = "☹ OOPS!!! There is already a show being added on that date.\n"
-            + "Please try again. \n";
+    private static final String MESSAGE_ENTRY = "%1$d. %2$s (on: %3$s)\n";
 
-    private static final String MESSAGE_SUCCESSFUL = "Got it. I've added this show:\n"
-            + "%1$s on %2$s\n";
+    private static final String MESSAGE_UNSUCCESSFUL = "☹ OOPS!!! Unable to add the following shows:\n";
 
     /**
      * Add a show to the show list.
      *
-     * @param showName      name of new show.
-     * @param date          date of new show.
-     * @param seatBasePrice the base price of the seat.
+     * @param splitStr String of format "SHOW_NAME|SEAT_BASE_PRICE|DATE_1|DATE_2|etc"
      */
-    public AddCommand(String showName, String date, double seatBasePrice) {
-        // need to check if it is a valid date if not need to throw exception
-        this.showName = showName;
-        this.date = date;
-        this.seatBasePrice = seatBasePrice;
+    public AddCommand(String splitStr) {
+        this.details = splitStr;
     }
 
     @Override
-    public void execute(Model model, Ui ui, Storage storage) {
-        ShowMap shows = model.getShows();
-        Theatre theatre = new Theatre(showName, seatBasePrice);
-        LocalDate today = storage.getToday();
-
+    public String execute(Model model, Ui ui, Storage storage) {
+        String showName;
+        String[] showDates;
+        double seatBasePrice;
         try {
-            if (!formatter.isValidDate(date)) {
-                throw new OptixInvalidDateException();
+            String[] detailsArray = parseDetails(details);
+            showName = detailsArray[0].trim();
+            showDates = detailsArray[2].trim().split("\\|");
+            seatBasePrice = Double.parseDouble(detailsArray[1]);
+            if (seatBasePrice < 0) {
+                throw new OptixException("Seat base price cannot be negative.\n");
+            }
+        } catch (NumberFormatException e) {
+            ui.setMessage("Please set a number for the seat base price.\n");
+            return "show";
+        } catch (OptixException e) {
+            ui.setMessage(e.getMessage());
+            return "show";
+        }
+
+        LocalDate today = storage.getToday();
+        ArrayList<String> errorShows = new ArrayList<>();
+        StringBuilder message = new StringBuilder(MESSAGE_SUCCESSFUL);
+        int counter = 1;
+
+        for (String showDate : showDates) {
+            String date = showDate.trim();
+            if (!hasValidDate(date)) {
+                errorShows.add(date);
+                continue;
             }
 
             LocalDate showLocalDate = formatter.toLocalDate(date);
 
-            if (showLocalDate.compareTo(today) <= 0) {
-                ui.setMessage(MESSAGE_IN_THE_PAST);
-            } else if (shows.containsKey(showLocalDate)) {
-                ui.setMessage(MESSAGE_THEATRE_BOOKED);
+            if (showLocalDate.compareTo(today) <= 0 || model.containsKey(showLocalDate)) {
+                errorShows.add(date);
             } else {
-                shows.put(showLocalDate, theatre);
-                model.setShows(shows);
-                ui.setMessage(String.format(MESSAGE_SUCCESSFUL, theatre.getShowName(), date));
+                model.addShow(showName, showLocalDate, seatBasePrice);
+                message.append(String.format(MESSAGE_ENTRY, counter, showName, date));
+                counter++;
             }
-        } catch (OptixInvalidDateException e) {
-            ui.setMessage(e.getMessage());
         }
+        if (errorShows.size() == showDates.length) {
+            message = new StringBuilder(MESSAGE_UNSUCCESSFUL);
+        } else if (errorShows.size() != 0) {
+            message.append("\n" + MESSAGE_UNSUCCESSFUL);
+        }
+        for (int i = 0; i < errorShows.size(); i++) {
+            message.append(String.format(MESSAGE_ENTRY, i + 1, showName, errorShows.get(i)));
+        }
+        ui.setMessage(message.toString());
+        storage.write(model.getShows());
+        return "show";
     }
 
-
     @Override
-    public boolean isExit() {
-        return super.isExit();
+    public String[] parseDetails(String details) throws OptixInvalidCommandException {
+        String[] detailsArray = details.trim().split("\\|", 3);
+        if (detailsArray.length != 3) {
+            throw new OptixInvalidCommandException();
+        }
+        return detailsArray;
+    }
+
+    private boolean hasValidDate(String date) {
+        return formatter.isValidDate(date);
     }
 }
