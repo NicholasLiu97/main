@@ -148,8 +148,10 @@ public class Model {
         } else {
             if (showsQuery.length == 2) { // query is for current month
                 message.append(String.format("The current earnings for %1$s is $%2$.2f.\n", monthYear, profit));
-                message.append(String.format("The projected earnings for the rest of the month is $%1$.2f.\n",
-                        projectedProfit));
+                if (projectedProfit > 0) {
+                    message.append(String.format("The projected earnings for the rest of the month is $%1$.2f.\n",
+                            projectedProfit));
+                }
             } else { //either from ShowMap or ShowHistoryMap
                 if (showsQuery[0].equals(shows)) {
                     message.append(String.format("The projected earnings for %1$s is $%2$.2f.\n", monthYear,
