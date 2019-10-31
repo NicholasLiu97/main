@@ -79,27 +79,20 @@ dialog first)
 == Implementation
 This section describes some noteworthy details on how certain features are implemented.
 
-=== [Proposed] Sell Seats Feature
-Allows users to sell seats for a specific show.
-
-==== Proposed implementation
-//todo
-==== Design Considerations
-//todo
-
 === [Proposed] View Monthly Revenue Feature
+Allows user to view their profit for a specific month.
 
 ==== Proposed Implementation
 Viewing the monthly revenue is executed by the `ViewMonthlyCommand`, which extends from the abstract class `Command` and
-is stored under the Command package. +
+is stored under the commands package. +
+Additionally, it implements the following operations based on the query date:
 
-Additionally, it implements the following operations based on the query date: +
-* Model#findMonthly() -- Retrieves the list of shows in the month specified by the input. +
-* Model#getShows() -- Retrieves the current list of shows should the user query be in the future. +
-* Model#getShowshistory() -- Retrieves the archive list should the user query be in the past. +
-* OptixDateFormatter#getMonth() -- get the integer value of the month. +
-* OptixDateFormatter#getYear() -- get the integer value of the year. +
-* Theatre#getProfit() -- get the profit earned for the show. +
+* Model#findMonthly() -- Retrieves the list of shows in the month specified by the input.
+* Model#getShows() -- Retrieves the current list of shows should the user query be in the future.
+* Model#getShowshistory() -- Retrieves the archive list should the user query be in the past.
+* OptixDateFormatter#getMonth() -- get the integer value of the month.
+* OptixDateFormatter#getYear() -- get the integer value of the year.
+* Theatre#getProfit() -- get the profit earned for the show.
 
 Given below is an example usage scenario of the `ViewMonthlyCommand` at each step.
 
@@ -121,17 +114,17 @@ The profit for each of the shows in the remaining list is then added up in `Mode
 
 The following sequence diagram shows how the view-monthly operation works:
 
-image::images/SequenceDiagram_ViewMonthly.png[width ="600", align="center"]
+image::images/devguide/DG_ViewMonthly_SequenceDiagram.png[width ="600", align="center"]
 
 The following activity diagram summarizes what happens when a user executes the ViewMonthly Command:
 
-image::images/ActivityDiagram_ViewMonthly.png[width ="600", align="center"]
+image::images/devguide/DG_ViewMonthly_ActivityDiagram.png[width ="300", align="center"]
 
 ==== Design Considerations
 
-*Aspect: How view-monthly executes* +
+*Aspect: How view-monthly executes*
 
-* Alternative 1 (current choice): Saves the archive shows and current shows separately. +
+* Alternative 1 (current choice): Saves the archive shows and current shows separately.
 ** Pros: Reduces search time Optix knows which list to search from.
 ** Cons: Archive list does not need any methods and certain parameters since it is only a list to store show names and
 revenue. Have to insert dummy values for Archive list since Archive and current list are from the same class and now
@@ -141,28 +134,77 @@ use the same parameters.
 ** Pros: Archive list and current list will have their own class and reduces dependency.
 ** Cons: Certain code needs to be repeated which may be confusing.
 
-=== Delete Show Feature
-Allows users to delete shows from the shows ShowMap.
+=== [Proposed] Sell Seats Feature
+Allows user to sell seats for a specific show.
 
-==== Implementation
-//todo
+==== Proposed Implementation
+Selling of seats is executed by the `SellSeatCommand`, which extends from an abstract class `Command` and
+is stored under the commands package. Additionally, it implements the following operations based on the user input.
 
-===  Design Considerations
-//todo
+* OptixDateFormatter#isValidDate -- Ensures that the date keyed is valid.
+* Model#containsKey -- Check if the date has any show scheduled.
+* Model#hasSameName -- Check if the show name matches the show in the TreeMap for the specified date.
+* Model#sellSeat -- Sell seats corresponding to the seat number that is keyed by user.
 
-== Command Aliasing
-Enable users to set up aliases for the commands.
+Given below is an example usage scenario and how the sell seat mechanism behaves at each step.
 
-=== Implementation
-//todo
+*Step 1* +
+The user executes `sell Phantom of the Opera|5/5/2020|C1 D6 E10` command to sell the following seats C1 D6 E10
+for the show Phantom of the Opera on 5th May 2020. The `SellSeatCommand` command calls `OptixDateFormatter#isValidDate(String date)`
+to first check if the given date is a valid date.
 
-=== Design Considerations
+*Step 2* +
+Once verified, the `SellSeatCommand` command calls `Model#containsKey(LocalDate date)` and `Model#hasSameName(LocalDate date, String showName)`
+to check if the show in query exist within `Model`.
 
+*Step 3* +
+Once it has been confirmed that the show exist, the `SellSeatCommand` command calls `Model#sellSeats(LocalDate date, String[] seats)`
+to query if the seats have been booked. Whenever a seat has been purchased successfully, the revenue obtained from
+the show will then be updated accordingly.
 
+The following activity diagram summarizes what happens when a user executes sell seat command.
 
+image::images/devguide/DG_SellSeat_ActivityDiagram.png[width ="300", align="center"]
 
+==== Design Considerations
 
+*Aspect: How sell seat executes* +
 
+* Alternative 1 (current choice)
+** Format: `sell Harry Potter | 5/5/2020 | A1 A2 A3 A4`
+
+** Pros:
+*** Easy to implement and less buggy.
+*** Simplicity of code allows it to handle exception and edge cases more efficiently.
+*** Ability to bulk purchase seats.
+
+** Cons:
+*** Less intuitive. User has to carry out one additional command view before carrying out the booking.
+
+* Alternative 2 (previous choice):
+** Format: `sell Harry Potter | 5/5/2020`
+** Alternative: `sell Harry Potter | 5/5/2020 | A1 A2 A3 A4`
+
+** Pros:
+*** More flexible. Seating arrangement will be shown without explicit command for it.
+*** Ability to bulk purchase seats.
+
+** Cons:
+*** Incompatible with GUI as code requires CLI query for seats, causing GUI to hang once command is used.
+*** Code is deeply-nested which violates coding standards.
+*** User has to key in the seats 1 by 1.
+
+Below is the code snippet for our previous implementation:
+
+image::images/devguide/DG_SellSeat_CodeBlock.png[align="center"]
+
+*Choice for current implementation:* +
+
+While *Alternative 2* is more intuitive and allows for better control over the sales of seats,
+ultimately we have chosen *Alternative 1* as it is more compatible with our GUI codebase.
+Furthermore with the implementation of GUI, it would also be more intuitive for the users
+to get the seating arrangements for a particular show before they attempt to make any sales for the seat
+as it would be impossible for them to memorise all the seats that they have sold.
 
 
 
@@ -262,25 +304,26 @@ the seats to new customers
 
 *MSS*
 
-----
-1. User enters the add command, followed by the name of the show, the date, the cost of the show and the base selling price of the seats.
-2. Optix responds by displaying the show that the user has added to the list.
+. User enters the add command, followed by the name of the show, the date, the cost of the show and the base selling price of the seats.
+. Optix responds by displaying the show that the user has added to the list.
 
 Use case ends.
-----
 
-*Extensions*
 
-----
-1a. Optix detects an error in the details entered.
-1a1. Optix displays an error message that shows the part of the command that was entered incorrectly.
-1a2. Optix requests command from user again.
-1a3. User re-enters details.
-Steps 1a2-1a3 are repeated until details entered are correct.
-Use case resumes from step 2.
+==== *Extensions*
+
+
+* Extension 1
+.. Optix detects an error in the details entered.
+.. Optix displays an error message that shows the part of the command that was entered incorrectly.
+.. Optix requests command from user again.
+.. User re-enters details.
+
+Steps i to iv are repeated until details entered are correct.
+Use case resumes from step 2 of MSS. +
 
 Use case ends.
-----
+
  
 
 === Use case: UC02 - Sell seats to buyer
@@ -289,30 +332,33 @@ Use case ends.
 
 *MSS*
 
-----
-1. User enters the sell command, followed by the name of the show, the date, the name of the buyer and lastly the seats requested by the buyer.
-2. Optix responds by displaying the seats bought and the cost of the transaction.
-         Use case ends.
-----
 
-*Extensions*
+. User enters the sell command, followed by the name of the show, the date, the name of the buyer and lastly the seats requested by the buyer.
+. Optix responds by displaying the seats bought and the cost of the transaction.
 
-----
-      1a. Optix detects an error in the details of the show entered.
-      1a1. Optix displays an error message that shows the part of the command that was entered  
-              incorrectly.
-      1a2. Optix requests command from user again.
-      1a3. User re-enters details. 
-      Steps 1a2-1a3 are repeated until details entered are correct.
-      Use case resumes from step 1.
+Use case ends.
 
-      1b. Optix detects that the seats entered are unavailable. 
-      1b1. Optix requests command from user again.
-      1b2. User re-enters details.
-      Steps 1b1-1b2 are repeated until details entered are correct.
-      Use case resumes from step 2.
-          Use case ends.
-----
+
+==== *Extensions*
+* Extension 1
+.. Optix detects an error in the details of the show entered.
+.. Optix displays an error message that shows the part of the command that was entered
+      incorrectly.
+.. Optix requests command from user again.
+.. User re-enters details.
+
+Steps i to iv are repeated until details entered are correct.
+Use case resumes from step 1 of MSS.
+
+* Extension 2
+.. Optix detects that the seats entered are unavailable.
+.. Optix requests command from user again.
+.. User re-enters details.
+
+Steps i to iii are repeated until details entered are correct.
+Use case resumes from step 2 of MSS.
+
+
 
 
 === Use case: UC03 - Delete a single show scheduled on a particular date
@@ -321,22 +367,24 @@ Use case ends.
 
 *MSS*
 
-----
-1. User enters the delete command followed by the date of the show, and the show name. 
-2. Optix responds by displaying the show/shows that have been removed from the list.
-         Use case ends.
-----
+
+. User enters the delete command followed by the date of the show, and the show name.
+. Optix responds by displaying the show/shows that have been removed from the list.
+
+Use case ends.
+
 
 *Extensions*
 
-----
-      1a. Optix cannot find the show using the details entered.
-      1a1. Optix requests command from user again.
-      1a2. User re-enters command. 
-      Steps 1a1-1a2 are repeated until shows entered are correct.
-      Use case resumes from step 2.
-          Use case ends.
-----
+* Extension 1
+.. Optix cannot find the show using the details entered.
+.. Optix requests command from user again.
+.. User re-enters command.
+
+Steps i to iii are repeated until shows entered are correct.
+Use case resumes from step 2 of MSS.
+
+
 
 
 === Use case: UC04 - Delete multiple shows by show name
@@ -345,24 +393,20 @@ Use case ends.
 
 *MSS*
 
-----
-1. User enters the delete command followed by the names of the shows to delete.
-2. Optix searches through the list of shows for all shows with the specified name, and deletes them.
-3. Optix replies by displaying the show/shows that have been removed from the list.
+. User enters the delete command followed by the names of the shows to delete.
+. Optix searches through the list of shows for all shows with the specified name, and deletes them.
+. Optix replies by displaying the show/shows that have been removed from the list.
          Use case ends.
-----
 
 *Extensions*
 
-----
-      1a. Optix cannot find intended show(s) using the show name(s) specified.
-      1a1. Optix replies by listing all the shows the could not be found.
-      1a2. User re-enters command. 
-      Steps 1a1-1a2 are repeated until shows entered are correct.
-      Use case resumes from step 2.
-          Use case ends.
-----
+* Extension 1
+.. Optix cannot find intended show(s) using the show name(s) specified.
+.. Optix replies by listing all the shows the could not be found.
+.. User re-enters command.
 
+Steps i to iii are repeated until shows entered are correct.
+Use case resumes from step 2 of MSS.
 
 === Use case: UC05 - View the entire list of shows
 
@@ -370,12 +414,10 @@ Use case ends.
 
 *MSS*
 
-----
-1. User enters the list command.
-2. Optix responds by displaying the list of shows available for booking.
-         Use case ends.
-----
+. User enters the list command.
+. Optix responds by displaying the list of shows available for booking.
 
+Use case ends.
 
 === Use case: UC06- View available seats of a show
 
@@ -383,24 +425,22 @@ Use case ends.
 
 *MSS*
 
-----
-1. User enters the view command, followed by the show name and date of the show.
-2. Optix responds by displaying the available seats of the theatre for the show, by marking reserved seats with a cross, and available seats with a tick.
-          Use case ends.
-----
+. User enters the view command, followed by the show name and date of the show.
+. Optix responds by displaying the available seats of the theatre for the show, by marking reserved seats with a cross, and available seats with a tick.
+
+Use case ends.
+
 
 *Extensions*
 
-----
-      1a. Optix detects that there is no such show on that date. 
-      1a1. Optix replies that there is no such show on the date.
-      1a2. Optix requests command from user again.
-      1a3. User re-enters command. 
-      Steps 1a1-1a3 are repeated until the command entered is correct.
-      Use case resumes from step 2.
-          Use case ends.
-----
+* Extension 1
+.. Optix detects that there is no such show on that date.
+.. Optix replies that there is no such show on the date.
+.. Optix requests command from user again.
+.. User re-enters command.
 
+Steps i to iv are repeated until the command entered is correct.
+Use case resumes from step 2 of MSS.
 
 === Use Case: UC07 - Refund ticket for seat
 
@@ -408,34 +448,33 @@ Use case ends.
 
 *MSS*
 
-----
-1. User enters the refund command, followed by show name, show date, and seat number.
-2. Optix responds by querying if the ticket for the seat was purchased. If it is, then the seat is marked as available again.
-3. Optix updates the finances from the refund. 
-4. Optix replies with a success confirmation.
-          Use case ends.
-----
+. User enters the refund command, followed by show name, show date, and seat number.
+. Optix responds by querying if the ticket for the seat was purchased. If it is, then the seat is marked as available again.
+. Optix updates the finances from the refund.
+. Optix replies with a success confirmation.
+
+Use case ends.
 
 *Extensions*
 
-----
-      1a. Optix detects that the show does not exist
-      1a1. Optix replies that there is no such show.
-      1a2. Optix requests command from user again.
-      1a3. User re-enters command, with the correct show name.
-      Steps 1a1-1a3 is repeated until the command entered is valid.
-      Use case resumes from step 3.
-          Use case ends.
+* Extension 1
+.. Optix detects that the show does not exist
+.. Optix replies that there is no such show.
+.. Optix requests command from user again.
+.. User re-enters command, with the correct show name.
 
-      2a. Optix detects that the seat was not purchased.
-      2a1. Optix replies that the request to refund this seat is invalid.
-      2a2. Optix requests command from user again.
-      2a3. User re-enters command, with a correct seat number.
-      Steps 2a1-2a3 is repeated until the command entered is valid.
-      Use case resumes from step 3.
-          Use case ends.
-----
+Steps i to iv are repeated until the command entered is valid.
+Use case resumes from step 3 of MSS.
 
+* Extension 2
+
+.. Optix detects that the seat was not purchased.
+.. Optix replies that the request to refund this seat is invalid.
+.. Optix requests command from user again.
+.. User re-enters command, with a correct seat number.
+
+Steps i to iv is repeated until the command entered is valid.
+Use case resumes from step 3 of MSS.
 
 === Use case: UC08- Tutorial/ Help Command
 
@@ -443,12 +482,8 @@ Use case ends.
 
 *MSS*
 
-----
-1. User enters the help command.
-2. Optix responds by displaying all available commands and their usage.
-----
-
-
+. User enters the help command.
+. Optix responds by displaying all available commands and their usage.
 
 === Use case: UC09 - Postpone shows to a later date
 
@@ -456,31 +491,30 @@ Use case ends.
 
 *MSS*:
 
-----
-1. User enters the postpone command, followed by the name of the show, the current-date of the show to postpone and the new-date.
-2. Optix responds by displaying the new-date for the show.
+. User enters the postpone command, followed by the name of the show, the current-date of the show to postpone and the new-date.
+. Optix responds by displaying the new-date for the show.
          Use case ends.
-----
 
 *Extensions*:
 
-----
-      1a. Optix detects an error in the details entered.      
-      1a1. Optix informs the user that the show has passed.      
-      1a2. Optix requests command from user again.
-      1a3. User re-enters command. 
-      Steps 1a1-1a3 are repeated until the command entered is correct.
-      Use case resumes from step 2.
-          Use case ends.
+* Extension 1
+.. Optix detects an error in the details entered.
+.. Optix informs the user that the show has passed.
+.. Optix requests command from user again.
+.. User re-enters command.
 
-      1b. Optix detects that  there is no show of the given input in the list.
-      1b1. Optix informs the user that the show does not exist.
-      1b2. Optix requests command from user again.
-      1b3. User re-enters command. 
-      Steps 1b1-1b3 are repeated until the command entered is correct.
-      Use case resumes from step 2.
-          Use case ends.
-----
+Steps i to iv are repeated until the command entered is correct.
+Use case resumes from step 2 of MSS.
+
+* Extension 2
+.. Optix detects that  there is no show of the given input in the list.
+.. Optix informs the user that the show does not exist.
+.. Optix requests command from user again.
+.. User re-enters command.
+
+Steps i to iv are repeated until the command entered is correct.
+Use case resumes from step 2 of MSS.
+
 
 [appendix]
 == Functional Requirements
