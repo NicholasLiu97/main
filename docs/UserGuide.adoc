@@ -5,7 +5,6 @@
 :toc-title:
 :toc-placement: preamble
 :sectnums:
-:imagesDir: screenshots
 :stylesDir: stylesheets
 :xrefstyle: full
 :experimental:
@@ -55,6 +54,7 @@ e.g. if the command specifies `SHOW_NAME|SHOW_DATE`, `SHOW_DATE|SHOW_NAME` is in
 
 * All `SHOW_DATE` entered must be in the format dd/mm/yyyy
 
+
 * All *COMMAND* and `SHOW_NAME` are case insensitive.
 
 === Generic Commands
@@ -70,6 +70,7 @@ Format: `bye`
 
 === Show Commands
 
+
 ==== Adding shows: `add`
 Let's say that a new event is coming up and you'd like to add it to the application showlist.
 Use the `add` command to add shows to the current show list. +
@@ -77,7 +78,6 @@ Format: `add SHOW_NAME|SEATS_BASE_PRICE|DATE1|DATE2|...`
 
 [TIP]
 use `DATE1|DATE2|DATE3|...` to easily add multiple dates for the show
-
 * `SEATS_BASE_PRICE` represents the lowest cost of a seat in the venue.
 * There must be no other show on that `DATE`.
 * The `DATE` must be in the future.
@@ -115,6 +115,7 @@ Format: `list`
 Use `list` before you type other commands so you can see all the show names and show dates
 
 ==== Listing dates for specific show: `list`
+
 You can also search for all listings of a particular show with the `list` command!
 Current shows with the specified name will be listed. +
 Format: `list SHOW_NAME`
@@ -154,7 +155,8 @@ If you made a spelling error while adding an event, there is no need to delete a
 Use `edit` to change its name. +
 Format: `edit OLD_SHOW_NAME|SHOW_DATE|NEW_SHOW_NAME`
 
-* Changes the name of the specified show on `SHOW_DATE` from `OLD_SHOW_NAME` to `NEW_SHOW_NAME`
+* Changes the name of the specified `SHOW_DATE` with `OLD_SHOW_NAME` to `NEW_SHOW_NAME`
+
 * Invalid if the date of `OLD_SHOW_NAME` does not match `SHOW_DATE`
 
 ===== Examples:
@@ -249,10 +251,14 @@ view-monthly May 2020
 view-monthly January 2018
 ----
 === Alias Commands
+Aliases help you to create shortcuts for commands, hence enabling
+you to to input commands with less effort!
 
 ==== Add new alias: `add-alias`
-As a user, you can give a `Command` an alternate name for easy access.
-You can add them with `add-alias` to an existing `Command`. +
+As a user, you can give a Command an alternate name for easy access.
+You can add them with `add-alias` to an existing command.
+After adding the alias, it is immediately available for use! +
+
 Format: `add-alias ALIAS|COMMAND`
 
 * Adds a new alias for `COMMAND`
@@ -263,13 +269,20 @@ Format: `add-alias ALIAS|COMMAND`
 Give the command `add` an alias 't': +
 `add-alias t|add` +
 
+image::images/UG_add-alias_success.png[width ="600", align="center"]
+
 Assigning an alias that is already in use is not allowed. +
 `add-alias t|delete` would not work if 't' is paired to another command already.
 
-Assigning a command keyword as an alias is also not allowed: +
+image::images/UG_add-alias_failure.png[width ="600", align="center"]
+
+Assigning an command keyword as an alias is also not allowed: +
 `add-alias add|delete` is not allowed.
 
-==== Remove alias: `remove-alias`
+image::images/UG_add-alias_illegal.png[width ="600", align="center"]
+
+==== Remove alias: remove-alias
+
 Let's say you changed your mind after adding the alias.
 Use the `remove-alias` command to delete an existing alias. +
 Format: `remove-alias ALIAS|COMMAND`
@@ -280,15 +293,24 @@ Format: `remove-alias ALIAS|COMMAND`
 ----
 remove-alias t|add
 ----
-==== List alias: `list-alias`
+
+image::images/UG-remove_alias-success.png[width ="600", align="center"]
+
+==== List alias: list-alias
 If you forgot the aliases you set, or would like to view the default aliases,
 use the `list-alias` command! +
 Format: `list-alias`
 
-==== Reset alias: `reset-alias`
+image::images/UG_list-alias_success.png[width ="600", align="center"]
+
+==== Reset alias: reset-alias
 To undo all your alias modifications, use the `reset-alias` command
-to set them back to the defaults. +
+to set them back to the defaults. After the reset, use `list-alias` to
+view the default aliases. +
 Format: `reset-alias`
+
+image::images/UG_reset-alias_success.png[width ="600", align="center"]
+
 
 == FAQ
 
