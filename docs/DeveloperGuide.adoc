@@ -120,6 +120,44 @@ The profit for each of the shows in the remaining list is then added up in `Mode
 
 The following sequence diagram shows how the view-monthly operation works:
 
+image::images/SequenceDiagram_ViewMonthly.png[width ="600", align="center"]
+
+The following activity diagram summarizes what happens when a user executes the ViewMonthly Command:
+
+image::images/ActivityDiagram_ViewMonthly.png[width ="600", align="center"]
+
+==== Design Considerations
+
+*Aspect: How view-monthly executes* +
+
+* Alternative 1 (current choice): Saves the archive shows and current shows separately. +
+** Pros: Reduces search time Optix knows which list to search from.
+** Cons: Archive list does not need any methods and certain parameters since it is only a list to store show names and
+revenue. Have to insert dummy values for Archive list since Archive and current list are from the same class and now
+use the same parameters.
+
+* Alternative 2: Save archive and current shows together
+** Pros: Archive list and current list will have their own class and reduces dependency.
+** Cons: Certain code needs to be repeated which may be confusing.
+
+=== Delete Show Feature
+Allows users to delete shows from the shows ShowMap.
+
+==== Implementation
+//todo
+
+===  Design Considerations
+//todo
+
+== Command Aliasing
+Enable users to set up aliases for the commands.
+
+=== Implementation
+//todo
+
+=== Design Considerations
+
+
 
 
 
@@ -158,49 +196,57 @@ The following sequence diagram shows how the view-monthly operation works:
 |Priority |As a ... |I want to ... |So that I can ...
 |Must-have |new user |see the command summary |refer to them when I forgot how to use the system.
 
-|Must-have |user |book seats for customers and process the transaction |track my sales and avoid double-selling the same seat.
+|Must-have |manager |track seats sold to customers |track my sales and avoid double-selling the same seat.
 
-|Must-have |user |add new shows to my current list |record the booking of the venue on a particular date.
+|Must-have |manager |add new shows to my current list |record the booking of the venue on a particular date.
 
 |Must-have |user |view all the seats of a particular show |inform my customers on the availability of seats.
 
-|Must-have |user |view the finances from each show |calculate my profit from my business.
+|Must-have |accountant |view the finances from each show |calculate my profits from my business.
 
-|Must-have |user |set the prices of the seats |vary seat prices depending on the popularity of the show.
+|Must-have |manager |set the prices of the seats |vary seat prices depending on the popularity of the show.
 
-|Must-have |user |assign seats to customers |check where the customers are sitting.
+|Must-have |manager |remove a particular show from my listing |free up the cancelled slot to other performers.
 
-|Must-have |user |remove a particular show from my listing |free up the cancelled slot to other performers.
+|Must-have |manager |remove shows that are in the past |reduce the quantity of shows in the listing to make query more
+efficient
 
-|Must-have |freqeunt user |remove shows that have passed from my listing |reduce the quantity of shows in the listing to make it more tidy.
+|Must-have |manager |set the tiers of the seats |set different prices depending on the popularity of the seats.
 
-|Must-have |user |set the tiers of the seats |set different prices depending on the popularity of the seats.
+|Must-have |manager |postpone shows |keep track of my shows even in the event of unforeseen circumstances.
 
-|Must-have |user |postpone shows as performers might have encountered unforseen circumstances. | |
+|Must-have |manager |edit the name of existing shows |correct spelling mistakes.
 
-Nice-to-have |user |add seats from different shows to a customer's purchase |manage bookings across multiple shows in one transaction. |
+|Must-have |user |customise the hotkeys for the different commands |increase the efficiency of keying in commands.
 
-Nice-to-have |user |refund seats before a certain date |resell the seats to other customers to increase profit. |
+|Must-have |manager |remove the booking on a seat |keep track of finances properly in case the booking was made wrongly.
 
-Nice-to-have |user |keep track of payments |track the expenditure by each customer and find out the specific amount for a refund(if applicable). |
+|Nice-to-have |user |add seats from different shows to a customer's purchase |manage bookings across multiple shows in one transaction.
 
-Nice-to-have |user |reassign seats booked by customers |fulfill customers'requests to change seats. |
+|Nice-to-have |user |refund seats before a certain date |Accomodate the needs of customers while being able to resell
+the seats to new customers
 
-Nice-to-have |user |blacklist customers who break the rules |serve as a deterrent for potential troublemakers and avoid further losses. |
+|Nice-to-have |user |keep track of payments |track the expenditure by each customer and find out the specific amount for a refund(if applicable).
 
-Nice-to-have |user |know the number of available seats in each tier for a particular show |get a rough idea of the number of seats left to sell from each tier. |
+|Nice-to-have |user |reassign seats booked by customers |fulfill customers' requests to change seats.
 
-Nice-to-have |user |modify the prices of the seats relative to the date of the show |sell off the seats and maximise my profits. |
+|Nice-to-have |user |blacklist customers who break the rules |serve as a deterrent for potential troublemakers and avoid further losses.
 
-Nice-to-have |user |keep track of the number of tickets each customer can buy |limit the number of tickets a customer can buy to avoid ticket scalping. |
+|Nice-to-have |user |know the number of available seats in each tier for a particular show |get a rough idea of the number of seats left to sell from each tier.
 
-Nice-to-have |user |customer rewards system |encourage customers to visit more often and thank loyal customers for their patronage. |
+|Nice-to-have |user |modify the prices of the seats relative to the date of the show |sell off the seats and maximise my profits.
 
-Nice-to-have |user |view monthly revenue |compare earnings and make new policies to improve my business. |
+|Nice-to-have |accountant |view monthly revenue |compare earnings and make new policies to improve business.
 
-Unlikely-to-have |user |put seats on hold |give customers more time to decide if they want to purchase the seats. |
+|Nice-to-have |user |query shows by month |would not be flooded with information that is not relevant.
 
-Unlikely-to-have |user |reserve seats for VIPs |allow VIPs to enjoy benefits as a reward for their support. |
+|Unlikely-to-have |user |keep track of the number of tickets each customer can buy |limit the number of tickets a customer can buy to avoid ticket scalping.
+
+|Unlikely-to-have |manager |customer rewards system |encourage customers to visit more often and thank loyal customers for their patronage.
+
+|Unlikely-to-have |manager |put seats on hold |give customers more time to decide if they want to purchase the seats.
+
+|Unlikely-to-have |manager |reserve seats for VIPs |allow VIPs to enjoy benefits as a reward for their support.
 
 |===
 // end::base-alt[]
@@ -218,20 +264,21 @@ Unlikely-to-have |user |reserve seats for VIPs |allow VIPs to enjoy benefits as 
 ----
 1. User enters the add command, followed by the name of the show, the date, the cost of the show and the base selling price of the seats.
 2. Optix responds by displaying the show that the user has added to the list.
-         Use case ends.
+
+Use case ends.
 ----
 
 *Extensions*
 
 ----
-      1a. Optix detects an error in the details entered.
-      1a1. Optix displays an error message that shows the part of the command that was entered  
-              incorrectly.
-      1a2. Optix requests command from user again.
-      1a3. User re-enters details. 
-      Steps 1a2-1a3 are repeated until details entered are correct.
-      Use case resumes from step 2.
-          Use case ends.
+1a. Optix detects an error in the details entered.
+1a1. Optix displays an error message that shows the part of the command that was entered incorrectly.
+1a2. Optix requests command from user again.
+1a3. User re-enters details.
+Steps 1a2-1a3 are repeated until details entered are correct.
+Use case resumes from step 2.
+
+Use case ends.
 ----
  
 
