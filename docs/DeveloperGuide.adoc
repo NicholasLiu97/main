@@ -4,7 +4,6 @@
 :toc-title:
 :toc-placement: preamble
 :sectnums:
-:imagesDir: images
 :stylesDir: stylesheets
 :xrefstyle: full
 ifdef::env-github[]
@@ -120,6 +119,8 @@ then passed into the `Model#findMonthly()` of the `Model` where a list of the sh
 The profit for each of the shows in the remaining list is then added up in `Model` by calling `Theatre#getProfit()`.
 
 The following sequence diagram shows how the view-monthly operation works:
+
+
 
 
 
