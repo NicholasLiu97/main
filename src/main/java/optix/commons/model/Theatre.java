@@ -215,18 +215,18 @@ public class Theatre {
             }
         }
 
-        if (seatsSold.isEmpty()) {
+        if (seatsSold.isEmpty()) { //all seats are unavailable or does not exist
             if (!seatsNotSold.isEmpty()) {
                 message.append(String.format("☹ OOPS!!! All of the seats %s are unavailable.\n", seatsNotSold));
             }
             if (!seatsNotExist.isEmpty()) {
                 message.append(String.format("☹ OOPS!!! All of the seats %s do not exist.\n", seatsNotExist));
             }
-        } else if (seatsNotSold.isEmpty() && seatsNotExist.isEmpty()) {
+        } else if (seatsNotSold.isEmpty() && seatsNotExist.isEmpty()) { //all seats are valid
             message.append("You have successfully purchased the following seats: \n"
                     + seatsSold + "\n"
                     + String.format(MESSAGE_TICKET_COST, totalCost));
-        } else {
+        } else { //combination of all
             message.append("You have successfully purchased the following seats: \n"
                     + seatsSold + "\n"
                     + String.format(MESSAGE_TICKET_COST, totalCost));
