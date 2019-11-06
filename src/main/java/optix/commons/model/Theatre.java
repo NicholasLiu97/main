@@ -153,9 +153,9 @@ public class Theatre {
     }
 
     private String getSeatsLeft() {
-        return "\nTier 1 Seats: " + tierOneSeats + "\n"
-                + "Tier 2 Seats: " + tierTwoSeats + "\n"
-                + "Tier 3 Seats: " + tierThreeSeats + "\n";
+        return "\nTier 1 Seats (rows E and F): " + tierOneSeats + "\n"
+                + "Tier 2 Seats (rows C and D): " + tierTwoSeats + "\n"
+                + "Tier 3 Seats (rows A and B): " + tierThreeSeats + "\n";
     }
 
 
