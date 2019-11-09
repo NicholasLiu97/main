@@ -35,7 +35,7 @@ checkstyle {
     toolVersion = '8.23'
 }
 
-group 'duke'
+group 'optix'
 version '0.1.0'
 
 
@@ -51,7 +51,6 @@ run {
 sourceSets {
     main {
         java {
-
             srcDirs = ["src/main/java"]
         }
         resources {
@@ -59,4 +58,5 @@ sourceSets {
         }
     }
 }
+
 
