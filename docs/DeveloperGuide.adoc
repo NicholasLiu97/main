@@ -934,3 +934,99 @@ A feature that is declared as nice-to-have is viewed as a non- priority. The fea
 
 A feature that is declared as unlikely-to-have is viewed as the least priority. The features with this label are likely to be ignored and only be done should they be viewed as extensions that could add on to the functionality of the program.
 
+[appendix]
+== Instructions for manual testing
+
+The instructions to test the program manually are given below.
+
+[NOTE]
+These instructions are meant to provide a starting point for testers to work on.
+Testers are expected to conduct more _exploratory_ testing.
+
+[NOTE]
+All commands, show names and parameters are case insensitive.
+
+=== Launch and Shutdown
+
+. Initial Launch
+.. Download the latest `optix.jar` link:{repoURL}/releases[here] and copy it into an empty folder.
+.. Double click the jar file +
+   Expected: Shows the GUI with a sample list of current shows and archive shows.
+
+=== Adding a show
+
+. Add new shows to the current list of shows with `SHOW_NAME`, `SEAT BASE PRICE` and `SHOW_DATES`
+
+.. Test case: `add aladdin|36|28/5/2020|30/5/2020|4/6/2020`
+   Expected: A show where `SHOW_NAME` is aladdin with `SHOW_DATES` on 28/5/2020, 30/5/2020 and 4/6/2020 and
+   `SEAT BASE PRICE` of $36 is added to the list of shows. A message indicating the show has been added to the list
+   will be displayed. The GUI will also show update the list of shows.
+
+.. Test case: `add just-dance|40|28/5/2020`
+   Prerequisites: Test case above(G.2.1.a) has been executed.
+   Expected: No show added since there is already a show on 28/5/2020. Message showing failure to add show displayed.
+
+.. Test case: `add just-dance|-20 | 10/10/2022`
+   Expected: No show added. Message showing that a negative pricing is used is displayed.
+
+.. Test case: `add just-dance|40| 5th may 2022`
+   Expected: No show added since date format is incorrect. Message showing failure to add show displayed.
+
+.. Test case: `add just-dance|5/5/2020|40`
+   Expected: No show added since the format of the command is incorrect. Message showing incorrect parameter displayed.
+
+.. Test case: `add just-dance|40|5/5/2017`
+   Expected: No show added since the date of the show is already in the past. Message showing failure to add show
+   displayed.
+
+.. Test case: `add just-dance|40|5/5/2122`
+   Expected: No show added since the date of the show is more than 100 years into the future. Message showing failure
+   to add show displayed.
+
+=== Deleting shows
+. Delete shows from the current list of shows with `SHOW_NAME` and `SHOW_DATE`.
+
+.. Prerequisites: List all shows using the `list` command. There should be multiple shows in the list.
+
+.. Test case: `delete aladdin|30/5/2020`
+... Prerequisites: There must be a show called aladdin on 30/5/2020 in the list. +
+    Expected: aladdin on 30/5/2020 is deleted from the list.
+
+.. Test case: `delete lion king|1/1/2022|3/3/2022`
+... Prerequisites: There must be a show called lion king on 1/1/2022 and 3/3/2022 in the list. +
+    Expected: lion king on 1/1/2022 and 3/3/2022 deleted from the list. Shows deleted are displayed in the chat box.
+
+.. Test case: `delete non-existent show|4/4/2024` where `non-existent show` is any show that does not exist in the
+   current list.
+   Expected: No show deleted since there is no show called "non-existent show". Message showing failure to delete show
+   is displayed.
+
+.. Test case: `delete any show|5 may 2020` where `any show` is any show that is present in the list.
+   Expected: No show deleted since the date format is incorrect. Message showing failure to delete show displayed.
+
+.. Test case: `delete any show|incorrect date` where `any show is any show that is present in the list and
+   `incorrect date` a date in the format dd/mm/yyyy and does not match the date of that show in the list.
+   Expected: No show deleted since the date format is incorrect. Message showing failure to delete show displayed.
+
+=== Listing dates for a specific show.
+. List the available dates for the specified show with `SHOW_NAME`
+
+.. Prerequisites: List all shows using the `list` command. There should be multiple shows in the list.
+
+.. Test case: `list aladdin`
+... There should be a show called aladdin in the list.
+    Expected: The available dates for `aladdin` is displayed.
+
+.. Test case: `list non-existent show` where `non-existent show` is a show that does not exist in the list.
+   Expected: Message showing failure to find show of that `SHOW_NAME`.
+
+=== Listing shows for a specific month.
+. List the available shows for the specified month with `MONTH YEAR`
+
+.. Prerequisites: List all shows using the `list` command. There should be multiple shows in the list.
+
+.. Test case: `list 12 2020` or `list dec 2020` or `list december 2020`
+... Prerequisites: There should be at least one show in december 2020.
+    Expected: Message showing the list of shows in December 2020 are displayed.
+
+
