@@ -1,3 +1,4 @@
+a|add
 b|bye
 shw|show
 d|delete
@@ -9,9 +10,4 @@ rd|reschedule
 re|reassign-seat
 arc|archive
 s|sell
-a-a|add-alias
 v|view
-vm|view-monthly
-vp|view-profit
-rm-a|remove-alias
-rst-a|reset-alias
