@@ -1,5 +1,7 @@
-package optix.commands.finance;
+//@SuppressWarnings("checkstyle:membername")
+package Optix.commands.finance; // CHECKSTYLE IGNORE THIS LINE
 
+import optix.commands.finance.ViewMonthlyCommand;
 import optix.commands.seats.SellSeatCommand;
 import optix.commands.shows.AddCommand;
 import optix.commons.Model;
